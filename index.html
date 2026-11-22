@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Nord Lane</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&amp;family=DM+Sans:wght@400;500;700&amp;family=DM+Mono:wght@400;500&amp;display=swap">
+<style>
+/* Layout: sticky bar, dark hero with layered-gradient plate, category tiles, filterable grid, slide-in cart drawer, about + contact split */
+:root{
+  --bg:#EDF0F2; --surface:#F8FAFB; --ink:#13202A; --muted:#566570; --line:#D3DAE0;
+  --accent:#1F5C4A; --accent-ink:#FFFFFF; --hot:#B5432F;
+  --hero-bg:#14242F; --hero-fg:#EAF1F4; --hero-muted:#9FB2BE;
+  --font-display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --font-body:"DM Sans","Segoe UI",system-ui,sans-serif;
+  --font-mono:"DM Mono",ui-monospace,Menlo,Consolas,monospace;
+  --gutter-l:max(16px,env(safe-area-inset-left,0px));
+  --gutter-r:max(16px,env(safe-area-inset-right,0px));
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0D151B; --surface:#16212A; --ink:#E8EEF2; --muted:#93A1AC; --line:#2A3944;
+  --accent:#5FB89A; --accent-ink:#0B1A14; --hot:#E0775F; color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#0D151B; --surface:#16212A; --ink:#E8EEF2; --muted:#93A1AC; --line:#2A3944;
+  --accent:#5FB89A; --accent-ink:#0B1A14; --hot:#E0775F; color-scheme:dark;}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:84px}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.55;
+  padding-left:0;padding-right:0}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--surface);z-index:60}
+h1,h2,h3{font-family:var(--font-display);line-height:1.08;margin:0;text-wrap:balance;letter-spacing:-.01em}
+p{margin:0}
+a{color:inherit}
+button,select,input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1200px;margin:0 auto;padding-left:var(--gutter-l);padding-right:var(--gutter-r)}
+.eyebrow{font-family:var(--font-mono);font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;border:1px solid var(--ink);background:var(--ink);color:var(--bg);
+  padding:.8rem 1.25rem;border-radius:4px;font-weight:500;cursor:pointer;text-decoration:none;transition:transform .15s,background .15s}
+.btn:hover{transform:translateY(-1px)}
+.btn.accent{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.ghost{background:transparent;color:inherit;border-color:currentColor}
+.btn[disabled]{opacity:.45;cursor:not-allowed;transform:none}
+
+/* header */
+header.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;background:var(--surface);border-bottom:1px solid var(--line)}
+.bar-in{display:flex;align-items:center;gap:1.5rem;min-height:64px}
+.logo{font-family:var(--font-display);font-weight:700;font-size:1.35rem;text-decoration:none;letter-spacing:-.02em;white-space:nowrap}
+.logo span{color:var(--accent)}
+nav.main{display:flex;gap:1.4rem;margin-left:auto;align-items:center}
+nav.main a{font-size:.95rem;text-decoration:none;color:var(--muted);padding:.25rem 0;border-bottom:2px solid transparent}
+nav.main a:hover{color:var(--ink);border-bottom-color:var(--accent)}
+.cart-btn{display:inline-flex;align-items:center;gap:.5rem;background:transparent;border:1px solid var(--line);border-radius:4px;padding:.5rem .85rem;cursor:pointer}
+.cart-btn:hover{border-color:var(--ink)}
+.cart-count{background:var(--accent);color:var(--accent-ink);border-radius:99px;min-width:1.4rem;height:1.4rem;display:grid;place-items:center;font-size:.78rem;font-family:var(--font-mono);padding:0 .35rem}
+@media (max-width:760px){nav.main a.hide-s{display:none}nav.main{gap:.9rem}.bar-in{gap:.75rem}}
+@media (max-width:480px){nav.main a:not(.keep){display:none}}
+@media (max-width:520px){.bar-in{flex-wrap:wrap;padding-block:.5rem;gap:.25rem 1rem}nav.main{margin-left:0;width:100%;justify-content:space-between;gap:.6rem}nav.main a{font-size:.88rem}}
+nav.main a[aria-current="page"]{color:var(--ink);border-bottom-color:var(--accent)}
+
+/* hero */
+.hero{background:var(--hero-bg);color:var(--hero-fg);margin-top:0}
+.hero-in{display:grid;grid-template-columns:1.05fr .95fr;gap:3rem;align-items:center;padding-block:4.5rem}
+.hero h1{font-size:clamp(2.5rem,6vw,4.6rem);font-weight:700;margin:1rem 0 1.2rem}
+.hero h1 em{font-style:normal;color:#8FD4B9}
+.hero p.lead{color:var(--hero-muted);max-width:46ch;font-size:1.08rem}
+.hero .eyebrow{color:var(--hero-muted)}
+.hero-cta{display:flex;flex-wrap:wrap;gap:.75rem;margin-top:2rem}
+.hero .btn{background:var(--hero-fg);color:var(--hero-bg);border-color:var(--hero-fg)}
+.hero .btn.ghost{background:transparent;color:var(--hero-fg);border-color:#4B6372}
+.hero-meta{display:flex;flex-wrap:wrap;gap:.5rem 1.6rem;margin-top:2.2rem;font-family:var(--font-mono);font-size:.78rem;color:var(--hero-muted)}
+.plate{position:relative;aspect-ratio:4/4.4;max-width:100%;border-radius:6px;overflow:hidden;
+  background:linear-gradient(160deg,#2D4B5C 0%,#1B3340 55%,#0F1D26 100%)}
+.plate .sun{position:absolute;width:46%;aspect-ratio:1;border-radius:50%;right:12%;top:14%;background:radial-gradient(circle at 35% 35%,#F2C98A,#D98A4E 70%)}
+.plate .ridge{position:absolute;left:-10%;right:-10%;bottom:0;height:46%;background:linear-gradient(180deg,#3E6B5E,#254538);clip-path:polygon(0 60%,18% 25%,34% 52%,52% 10%,70% 48%,86% 28%,100% 55%,100% 100%,0 100%)}
+.plate .ridge.b{height:30%;background:linear-gradient(180deg,#16302A,#0C1B18);clip-path:polygon(0 50%,22% 20%,45% 55%,63% 15%,82% 50%,100% 30%,100% 100%,0 100%)}
+.plate .tag{position:absolute;left:1rem;bottom:1rem;font-family:var(--font-mono);font-size:.72rem;letter-spacing:.08em;background:rgba(10,20,26,.7);color:#EAF1F4;padding:.4rem .6rem;border-radius:3px}
+@media (max-width:860px){.hero-in{grid-template-columns:1fr;padding-block:3rem;gap:2rem}.plate{aspect-ratio:16/11}}
+
+/* category tiles */
+.cats{padding-block:3.5rem 1rem}
+.cat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.2rem}
+.cat{position:relative;display:flex;flex-direction:column;justify-content:flex-end;min-height:180px;padding:1.2rem;border-radius:6px;border:0;text-align:left;cursor:pointer;color:#fff;overflow:hidden;isolation:isolate}
+.cat::before{content:"";position:absolute;inset:0;z-index:-1;transition:transform .4s}
+.cat:hover::before{transform:scale(1.05)}
+.cat.men::before{background:linear-gradient(135deg,#2B4A5E,#142733)}
+.cat.women::before{background:linear-gradient(135deg,#8A4F3E,#4A2A25)}
+.cat.acc::before{background:linear-gradient(135deg,#4F6B4A,#233524)}
+.cat h3{font-size:1.7rem}
+.cat span{font-family:var(--font-mono);font-size:.78rem;opacity:.85}
+@media (max-width:720px){.cat-grid{grid-template-columns:1fr}.cat{min-height:120px}}
+
+/* shop */
+.shop{padding-block:3rem 4rem}
+.shop-head{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:1rem 2rem}
+.shop-head h2{font-size:clamp(1.8rem,4vw,2.6rem)}
+.tools{display:flex;flex-wrap:wrap;gap:.75rem;align-items:center}
+.tabs{display:flex;flex-wrap:wrap;gap:.4rem}
+.tab{border:1px solid var(--line);background:transparent;border-radius:99px;padding:.45rem 1rem;cursor:pointer;font-size:.92rem}
+.tab:hover{border-color:var(--ink)}
+.tab[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.sort{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:.5rem .7rem}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1.4rem 1.1rem;margin-top:1.8rem}
+@media (max-width:1020px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:760px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:440px){.grid{grid-template-columns:minmax(0,1fr)}}
+.card{display:flex;flex-direction:column;gap:.7rem;min-width:0}
+.art{position:relative;aspect-ratio:4/5;border-radius:5px;overflow:hidden;background:linear-gradient(160deg,var(--c1),var(--c2));isolation:isolate}
+.art::before,.art::after{content:"";position:absolute;z-index:-1}
+.art.s-circle::before{width:70%;aspect-ratio:1;border-radius:50%;left:15%;top:12%;background:linear-gradient(160deg,var(--c3),transparent 80%);opacity:.85}
+.art.s-arch::before{width:56%;height:72%;left:22%;bottom:0;border-radius:999px 999px 0 0;background:linear-gradient(180deg,var(--c3),transparent 90%);opacity:.9}
+.art.s-bands::before{inset:0;background:repeating-linear-gradient(90deg,transparent 0 22%,var(--c3) 22% 30%);opacity:.55}
+.art.s-slope::before{inset:0;background:linear-gradient(115deg,transparent 45%,var(--c3) 45% 62%,transparent 62%);opacity:.75}
+.art.s-dot::before{width:34%;aspect-ratio:1;border-radius:50%;right:12%;top:10%;background:var(--c3)}
+.art.s-dot::after{left:-10%;right:-10%;bottom:-8%;height:48%;background:linear-gradient(180deg,var(--c3),transparent);opacity:.45;border-radius:50% 50% 0 0}
+.art .kind{position:absolute;left:.6rem;bottom:.6rem;font-family:var(--font-mono);font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;background:rgba(255,255,255,.88);color:#13202A;padding:.25rem .5rem;border-radius:3px}
+.art .flag{position:absolute;right:.6rem;top:.6rem;font-family:var(--font-mono);font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;background:var(--hot);color:#fff;padding:.25rem .5rem;border-radius:3px}
+.card h3{font-size:1.08rem;font-family:var(--font-body);font-weight:700;letter-spacing:0}
+.card .blurb{color:var(--muted);font-size:.88rem;min-height:2.6em}
+.row{display:flex;align-items:center;justify-content:space-between;gap:.6rem}
+.price{font-family:var(--font-mono);font-size:1rem;font-weight:500;font-variant-numeric:tabular-nums}
+.price s{color:var(--muted);margin-right:.35rem;font-size:.85rem}
+.buy{display:flex;gap:.5rem}
+.buy select{flex:0 0 auto;background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:.55rem .5rem;min-width:4.2rem}
+.buy .btn{flex:1;padding:.6rem .8rem;font-size:.92rem}
+.empty{grid-column:1/-1;padding:2rem;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:6px}
+
+/* about */
+.about{background:var(--surface);border-block:1px solid var(--line);padding-block:4rem}
+.about-in{display:grid;grid-template-columns:1fr 1fr;gap:3rem}
+.about h2{font-size:clamp(1.8rem,4vw,2.6rem);margin:.6rem 0 1.1rem}
+.about p+p{margin-top:1rem}
+.about p{color:var(--muted);max-width:56ch}
+.values{display:grid;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:6px;overflow:hidden;align-self:start}
+.value{background:var(--bg);padding:1.2rem 1.3rem}
+.value h3{font-size:1.15rem;margin-bottom:.3rem}
+.value p{font-size:.92rem}
+@media (max-width:820px){.about-in{grid-template-columns:1fr;gap:2rem}}
+
+/* contact */
+.contact{padding-block:4rem}
+.contact-in{display:grid;grid-template-columns:.8fr 1.2fr;gap:3rem}
+.contact h2{font-size:clamp(1.8rem,4vw,2.6rem);margin:.6rem 0 1.1rem}
+.facts{display:grid;gap:1rem;margin-top:1.5rem;font-size:.95rem}
+.facts dt{font-family:var(--font-mono);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.facts dd{margin:.15rem 0 0;user-select:all}
+form.contact-form{display:grid;gap:1rem;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:1.5rem}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+label{display:grid;gap:.35rem;font-size:.88rem;font-weight:500}
+input,select.field,textarea{background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:.7rem .8rem;width:100%;min-width:0}
+textarea{min-height:130px;resize:vertical}
+.notice{padding:.9rem 1rem;border-radius:4px;background:var(--bg);border:1px solid var(--accent);font-size:.92rem}
+@media (max-width:820px){.contact-in{grid-template-columns:1fr;gap:2rem}.two{grid-template-columns:1fr}}
+
+footer{border-top:1px solid var(--line);padding-block:1.6rem calc(1.6rem + env(safe-area-inset-bottom,0px));color:var(--muted);font-size:.85rem}
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:.5rem 2rem}
+
+/* admin */
+.adm{padding-block:2.5rem 4rem}
+.adm-head{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:1rem 2rem}
+.adm-head h2{font-size:clamp(1.8rem,4vw,2.6rem);margin-top:.4rem}
+.adm-actions{display:flex;flex-wrap:wrap;gap:.6rem}
+.adm-note{margin:1rem 0 1.4rem;font-size:.9rem;color:var(--muted)}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));background:var(--surface);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.stat{padding:1.2rem 1.4rem;display:grid;gap:.15rem;border-right:1px solid var(--line);min-width:0}
+.stat:last-child{border-right:0}
+.stat .l{font-family:var(--font-mono);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.stat b{font-family:var(--font-display);font-size:2rem;line-height:1.1;font-variant-numeric:tabular-nums}
+.stat small{color:var(--muted);font-size:.82rem}
+@media (max-width:640px){.stats{grid-template-columns:1fr}.stat{border-right:0;border-bottom:1px solid var(--line)}.stat:last-child{border-bottom:0}}
+.adm-tabs{margin:1.6rem 0 1rem}
+.atab{border:1px solid var(--line);background:transparent;border-radius:99px;padding:.45rem 1rem;cursor:pointer;font-size:.92rem}
+.atab:hover{border-color:var(--ink)}
+.atab[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.tbar{margin-bottom:.9rem}
+.pform{display:grid;gap:1rem;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:1.3rem;margin-bottom:1.2rem}
+.pform h3{font-size:1.3rem}
+.pform .acts-row{display:flex;flex-wrap:wrap;gap:.6rem}
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+.tbl-wrap table{width:100%;border-collapse:collapse;min-width:680px;font-size:.92rem}
+.tbl-wrap th{text-align:left;font-family:var(--font-mono);font-weight:500;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:.8rem;border-bottom:1px solid var(--line);white-space:nowrap}
+.tbl-wrap td{padding:.7rem .8rem;border-bottom:1px solid var(--line);vertical-align:middle}
+.tbl-wrap tr:last-child td{border-bottom:0}
+.tbl-wrap .num{text-align:right;font-family:var(--font-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.tbl-wrap td .sub{font-family:var(--font-mono);font-size:.74rem;color:var(--muted)}
+.tbl-wrap s{color:var(--muted);margin-right:.3rem}
+.tbl-wrap td.mono{font-family:var(--font-mono);font-size:.85rem;white-space:nowrap}
+.tbl-wrap td.items{min-width:220px;color:var(--muted)}
+.mini{display:block;width:34px;height:42px;border-radius:3px;background:linear-gradient(160deg,var(--c1),var(--c2))}
+.acts{white-space:nowrap;text-align:right}
+.sbtn{background:transparent;border:1px solid var(--line);border-radius:4px;padding:.35rem .7rem;font-size:.85rem;cursor:pointer}
+.sbtn:hover{border-color:var(--ink)}
+.sbtn.danger:hover{border-color:var(--hot);color:var(--hot)}
+.sbtn.confirm{background:var(--hot);border-color:var(--hot);color:var(--bg)}
+.st{background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:.35rem .5rem;font-size:.88rem}
+.st[data-st="Delivered"]{color:var(--accent)}
+.st[data-st="Cancelled"]{color:var(--hot)}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* cart drawer */
+.scrim{position:fixed;inset:0;background:rgba(8,14,18,.55);z-index:70;opacity:0;pointer-events:none;transition:opacity .25s}
+.scrim.on{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;bottom:0;right:0;width:min(440px,100%);background:var(--surface);z-index:80;display:flex;flex-direction:column;
+  transform:translateX(100%);transition:transform .3s ease;border-left:1px solid var(--line);
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);padding-right:env(safe-area-inset-right,0px)}
+.drawer.on{transform:none}
+.d-head{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.2rem;border-bottom:1px solid var(--line)}
+.d-head h2{font-size:1.3rem}
+.x{background:transparent;border:1px solid var(--line);border-radius:4px;width:2.2rem;height:2.2rem;cursor:pointer;font-size:1.1rem;line-height:1}
+.x:hover{border-color:var(--ink)}
+.d-body{flex:1;overflow:auto;padding:.4rem 1.2rem}
+.line{display:grid;grid-template-columns:64px 1fr auto;gap:.8rem;padding:1rem 0;border-bottom:1px solid var(--line);align-items:start}
+.line .thumb{width:64px;aspect-ratio:4/5;border-radius:4px;background:linear-gradient(160deg,var(--c1),var(--c2))}
+.line h3{font-family:var(--font-body);font-size:.98rem;font-weight:700;letter-spacing:0}
+.line .sub{font-family:var(--font-mono);font-size:.74rem;color:var(--muted);margin-top:.1rem}
+.qty{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:4px;margin-top:.6rem}
+.qty button{background:transparent;border:0;width:2rem;height:2rem;cursor:pointer;font-size:1rem}
+.qty button:hover{background:var(--bg)}
+.qty output{min-width:1.8rem;text-align:center;font-family:var(--font-mono);font-size:.9rem}
+.line .amt{text-align:right;font-family:var(--font-mono);font-variant-numeric:tabular-nums}
+.rm{display:block;margin:.6rem 0 0 auto;background:none;border:0;color:var(--muted);font-size:.8rem;text-decoration:underline;cursor:pointer;padding:0}
+.rm:hover{color:var(--hot)}
+.d-empty{padding:3rem 0;text-align:center;color:var(--muted)}
+.d-foot{border-top:1px solid var(--line);padding:1rem 1.2rem 1.2rem;display:grid;gap:.5rem}
+.sum{display:flex;justify-content:space-between;font-variant-numeric:tabular-nums}
+.sum.total{font-weight:700;font-size:1.15rem;padding-top:.5rem;border-top:1px dashed var(--line);margin-top:.2rem}
+.sum span:last-child{font-family:var(--font-mono)}
+.ship-note{font-size:.82rem;color:var(--muted)}
+.bar-ship{height:4px;border-radius:2px;background:var(--line);overflow:hidden}
+.bar-ship i{display:block;height:100%;background:var(--accent);transition:width .3s}
+.done{padding:3rem 1.2rem;text-align:center;display:grid;gap:.8rem;justify-items:center}
+.done h3{font-size:1.5rem}
+.toast{position:fixed;left:50%;bottom:calc(1.2rem + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:var(--ink);color:var(--bg);padding:.7rem 1.1rem;border-radius:4px;
+  z-index:90;opacity:0;pointer-events:none;transition:.25s;font-size:.9rem;max-width:calc(100% - 2rem)}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+
+<header class="bar">
+  <div class="wrap bar-in">
+    <a class="logo" href="#top" aria-label="Nord Lane home">Nord<span>/</span>Lane</a>
+    <nav class="main" aria-label="Primary">
+      <a href="#shop" data-cat="men" class="keep">Men</a>
+      <a href="#shop" data-cat="women" class="keep">Women</a>
+      <a href="#shop" data-cat="accessories" class="keep">Accessories</a>
+      <a href="#about" class="hide-s">About</a>
+      <a href="#contact" class="hide-s">Contact</a>
+      <a href="#admin" class="keep" id="navAdmin" aria-current="page">Admin</a>
+      <button class="cart-btn" id="openCart" aria-haspopup="dialog" aria-controls="drawer" aria-label="Open cart, 0 items">
+        <span>Cart</span><span class="cart-count" id="count">0</span>
+      </button>
+    </nav>
+  </div>
+</header>
+
+<main id="top" hidden="">
+  <section class="hero">
+    <div class="wrap hero-in">
+      <div>
+        <p class="eyebrow">Autumn / Winter 2026 · Drop 03</p>
+        <h1>Made for the walk between <em>places</em>.</h1>
+        <p class="lead">Wool, waxed cotton and recycled shell, cut for cold mornings and long commutes. Twelve pieces this season, each one worn hard before it ships.</p>
+        <div class="hero-cta">
+          <a class="btn" href="#shop">Shop the collection</a>
+          <a class="btn ghost" href="#about">Our approach</a>
+        </div>
+        <div class="hero-meta"><span>Free shipping over $150</span><span>30-day returns</span><span>Repair for life</span></div>
+      </div>
+      <div class="plate" role="img" aria-label="Abstract illustration of a low sun over pine-covered ridges">
+        <div class="sun"></div><div class="ridge"></div><div class="ridge b"></div>
+        <div class="tag">AW26 · 59.91°N 10.75°E</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap cats" aria-labelledby="catsT">
+    <p class="eyebrow">Browse</p>
+    <h2 id="catsT" style="font-size:clamp(1.6rem,3.5vw,2.2rem);margin-top:.4rem">Three ways in</h2>
+    <div class="cat-grid">
+      <button class="cat men" data-cat="men"><h3>Men</h3><span id="n-men">4 pieces</span></button>
+      <button class="cat women" data-cat="women"><h3>Women</h3><span id="n-women">4 pieces</span></button>
+      <button class="cat acc" data-cat="accessories"><h3>Accessories</h3><span id="n-accessories">4 pieces</span></button>
+    </div>
+  </section>
+
+  <section class="wrap shop" id="shop" aria-labelledby="shopT">
+    <div class="shop-head">
+      <div>
+        <p class="eyebrow">The collection</p>
+        <h2 id="shopT">Autumn / Winter 26</h2>
+      </div>
+      <div class="tools">
+        <div class="tabs" role="group" aria-label="Filter by category">
+          <button class="tab" data-cat="all" aria-pressed="true">All</button>
+          <button class="tab" data-cat="men" aria-pressed="false">Men</button>
+          <button class="tab" data-cat="women" aria-pressed="false">Women</button>
+          <button class="tab" data-cat="accessories" aria-pressed="false">Accessories</button>
+        </div>
+        <label style="display:block"><span class="eyebrow" style="display:none">Sort</span>
+          <select class="sort" id="sort" aria-label="Sort products">
+            <option value="featured">Featured</option>
+            <option value="low">Price: low to high</option>
+            <option value="high">Price: high to low</option>
+            <option value="name">Name</option>
+          </select>
+        </label>
+      </div>
+    </div>
+    <div class="grid" id="grid" aria-live="polite"><article class="card"><div class="art s-slope" style="--c1:#3C5A6B;--c2:#1E3340;--c3:#8FB3C4" role="img" aria-label="Fjell Wool Overshirt placeholder image"><span class="flag">New</span><span class="kind">Overshirt</span></div><div><div class="row"><h3>Fjell Wool Overshirt</h3></div><p class="blurb">Brushed wool blend, snap front, two chest pockets.</p></div><div class="row"><span class="price">$148.00</span></div><div class="buy"><select id="size-fjell-overshirt" aria-label="Size for Fjell Wool Overshirt"><option>XS</option><option>S</option><option selected="">M</option><option>L</option><option>XL</option></select><button class="btn accent" data-add="fjell-overshirt">Add to cart</button></div></article><article class="card"><div class="art s-circle" style="--c1:#5E6F5A;--c2:#2E3B2D;--c3:#C9D6A8" role="img" aria-label="Harbor Merino Crew placeholder image"><span class="kind">Knit</span></div><div><div class="row"><h3>Harbor Merino Crew</h3></div><p class="blurb">Fine-gauge merino, ribbed hem, true to size.</p></div><div class="row"><span class="price">$96.00</span></div><div class="buy"><select id="size-harbor-crew" aria-label="Size for Harbor Merino Crew"><option>XS</option><option>S</option><option selected="">M</option><option>L</option><option>XL</option></select><button class="btn accent" data-add="harbor-crew">Add to cart</button></div></article><article class="card"><div class="art s-bands" style="--c1:#8A7B62;--c2:#4A4030;--c3:#D9C9A3" role="img" aria-label="Tapered Field Trouser placeholder image"><span class="kind">Trouser</span></div><div><div class="row"><h3>Tapered Field Trouser</h3></div><p class="blurb">Cotton twill with a stretch waist and deep pockets.</p></div><div class="row"><span class="price">$112.00</span></div><div class="buy"><select id="size-field-trouser" aria-label="Size for Tapered Field Trouser"><option>XS</option><option>S</option><option selected="">M</option><option>L</option><option>XL</option></select><button class="btn accent" data-add="field-trouser">Add to cart</button></div></article><article class="card"><div class="art s-arch" style="--c1:#C2623F;--c2:#6B2D1B;--c3:#F2B58E" role="img" aria-label="Lane Water-Resist Parka placeholder image"><span class="flag">Sale</span><span class="kind">Outerwear</span></div><div><div class="row"><h3>Lane Water-Resist Parka</h3></div><p class="blurb">Recycled shell, taped seams, packable hood.</p></div><div class="row"><span class="price"><s>$290.00</s>$240.00</span></div><div class="buy"><select id="size-lane-parka" aria-label="Size for Lane Water-Resist Parka"><option>XS</option><option>S</option><option selected="">M</option><option>L</option><option>XL</option></select><button class="btn accent" data-add="lane-parka">Add to cart</button></div></article><article class="card"><div class="art s-arch" style="--c1:#A4795F;--c2:#573A2C;--c3:#EBC8A9" role="img" aria-label="Skog Wrap Coat placeholder image"><span class="flag">New</span><span class="kind">Outerwear</span></div><div><div class="row"><h3>Skog Wrap Coat</h3></div><p class="blurb">Double-faced wool, belted wrap, knee length.</p></div><div class="row"><span class="price">$265.00</span></div><div class="buy"><select id="size-skog-coat" aria-label="Size for Skog Wrap Coat"><option>XS</option><option>S</option><option selected="">M</option><option>L</option><option>XL</option></select><button class="btn accent" data-add="skog-coat">Add to cart</button></div></article><article class="card"><div class="art s-circle" style="--c1:#6C5B7B;--c2:#33293D;--c3:#CDB8E0" role="img" aria-label="Linnea Knit Dress placeholder image"><span class="kind">Dress</span></div><div><div class="row"><h3>Linnea Knit Dress</h3></div><p class="blurb">Midi rib knit with a soft funnel neck.</p></div><div class="row"><span class="price">$138.00</span></div><div class="buy"><select id="size-linnea-dress" aria-label="Size for Linnea Knit Dress"><option>XS</option><option>S</option><option selected="">M</option><option>L</option><option>XL</option></select><button class="btn accent" data-add="linnea-dress">Add to cart</button></div></article><article class="card"><div class="art s-bands" style="--c1:#3F5F8A;--c2:#1C2F4B;--c3:#9DB8DE" role="img" aria-label="Strand High-Rise Denim placeholder image"><span class="kind">Denim</span></div><div><div class="row"><h3>Strand High-Rise Denim</h3></div><p class="blurb">Rigid organic denim that softens with wear.</p></div><div class="row"><span class="price">$108.00</span></div><div class="buy"><select id="size-strand-denim" aria-label="Size for Strand High-Rise Denim"><option>XS</option><option>S</option><option selected="">M</option><option>L</option><option>XL</option></select><button class="btn accent" data-add="strand-denim">Add to cart</button></div></article><article class="card"><div class="art s-dot" style="--c1:#8C3F4B;--c2:#47202A;--c3:#E7A2AC" role="img" aria-label="Dusk Ribbed Turtleneck placeholder image"><span class="kind">Knit</span></div><div><div class="row"><h3>Dusk Ribbed Turtleneck</h3></div><p class="blurb">Close-fitting cotton rib, layers under anything.</p></div><div class="row"><span class="price">$74.00</span></div><div class="buy"><select id="size-dusk-turtleneck" aria-label="Size for Dusk Ribbed Turtleneck"><option>XS</option><option>S</option><option selected="">M</option><option>L</option><option>XL</option></select><button class="btn accent" data-add="dusk-turtleneck">Add to cart</button></div></article><article class="card"><div class="art s-bands" style="--c1:#B9A25E;--c2:#6A5A27;--c3:#F0E1A0" role="img" aria-label="Nord Wool Scarf placeholder image"><span class="kind">Scarf</span></div><div><div class="row"><h3>Nord Wool Scarf</h3></div><p class="blurb">Lambswool, 200 cm, fringed ends.</p></div><div class="row"><span class="price">$58.00</span></div><div class="buy"><select id="size-nord-scarf" aria-label="Size for Nord Wool Scarf"><option value="One size">One size</option></select><button class="btn accent" data-add="nord-scarf">Add to cart</button></div></article><article class="card"><div class="art s-slope" style="--c1:#4C6B66;--c2:#22352F;--c3:#A9D1C7" role="img" aria-label="Quay Canvas Tote placeholder image"><span class="kind">Bag</span></div><div><div class="row"><h3>Quay Canvas Tote</h3></div><p class="blurb">Waxed canvas, leather handles, inner zip pocket.</p></div><div class="row"><span class="price">$64.00</span></div><div class="buy"><select id="size-quay-tote" aria-label="Size for Quay Canvas Tote"><option value="One size">One size</option></select><button class="btn accent" data-add="quay-tote">Add to cart</button></div></article><article class="card"><div class="art s-dot" style="--c1:#7A5236;--c2:#3B2616;--c3:#D8A878" role="img" aria-label="Ridge Leather Belt placeholder image"><span class="kind">Belt</span></div><div><div class="row"><h3>Ridge Leather Belt</h3></div><p class="blurb">Vegetable-tanned leather, brushed steel buckle.</p></div><div class="row"><span class="price">$52.00</span></div><div class="buy"><select id="size-ridge-belt" aria-label="Size for Ridge Leather Belt"><option>30</option><option>32</option><option selected="">34</option><option>36</option><option>38</option></select><button class="btn accent" data-add="ridge-belt">Add to cart</button></div></article><article class="card"><div class="art s-circle" style="--c1:#5B6670;--c2:#2A3138;--c3:#B6C3CE" role="img" aria-label="Kvell Watch Cap placeholder image"><span class="kind">Hat</span></div><div><div class="row"><h3>Kvell Watch Cap</h3></div><p class="blurb">Double-knit merino, folds to the length you like.</p></div><div class="row"><span class="price">$34.00</span></div><div class="buy"><select id="size-kvell-cap" aria-label="Size for Kvell Watch Cap"><option value="One size">One size</option></select><button class="btn accent" data-add="kvell-cap">Add to cart</button></div></article></div>
+  </section>
+
+  <section class="about" id="about" aria-labelledby="aboutT">
+    <div class="wrap about-in">
+      <div>
+        <p class="eyebrow">About Nord Lane</p>
+        <h2 id="aboutT">Clothes that earn their place in the closet.</h2>
+        <p>Nord Lane began as a two-person studio sewing overshirts for friends who cycled to work in all weather. The idea has not changed much: fewer pieces, better cloth, and patterns tested through a full winter before anyone else sees them.</p>
+        <p>We buy wool from small mills, use recycled shell fabrics where they perform, and cut our trousers and coats with extra seam allowance so they can be altered and repaired for years.</p>
+      </div>
+      <div class="values">
+        <div class="value"><h3>Wear-tested</h3><p>Every sample is worn for eight weeks of real commutes before we approve the pattern.</p></div>
+        <div class="value"><h3>Repairable</h3><p>Send back any Nord Lane garment and we re-stitch, re-hem or patch it for a flat $10.</p></div>
+        <div class="value"><h3>Fewer, longer</h3><p>Twelve core pieces per season. Colors return each year so nothing goes out of date.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap contact" id="contact" aria-labelledby="contactT">
+    <div class="contact-in">
+      <div>
+        <p class="eyebrow">Contact</p>
+        <h2 id="contactT">Questions about fit, orders or repairs?</h2>
+        <p style="color:var(--muted);max-width:44ch">Write to us and a person replies within one working day. This is a demo store, so the form below does not send anything.</p>
+        <dl class="facts">
+          <div><dt>Email</dt><dd>hello@nordlane.example</dd></div>
+          <div><dt>Studio</dt><dd>14 Harbor Row, Fictionville (not a real address)</dd></div>
+          <div><dt>Hours</dt><dd>Mon to Fri, 09:00 to 17:00</dd></div>
+        </dl>
+      </div>
+      <form class="contact-form" id="contactForm" novalidate="">
+        <div class="two">
+          <label for="cName">Name<input id="cName" name="name" autocomplete="name" required=""></label>
+          <label for="cEmail">Email<input id="cEmail" name="email" type="email" autocomplete="email" required=""></label>
+        </div>
+        <label for="cTopic">Topic
+          <select class="field" id="cTopic" name="topic">
+            <option>Sizing and fit</option><option>An order</option><option>Repairs</option><option>Wholesale</option><option>Something else</option>
+          </select>
+        </label>
+        <label for="cMsg">Message<textarea id="cMsg" name="message" required=""></textarea></label>
+        <div id="formMsg" role="status"></div>
+        <button class="btn accent" type="submit">Send message</button>
+      </form>
+    </div>
+  </section>
+</main>
+
+<section class="adm" id="adminView" aria-labelledby="admT">
+  <div class="wrap">
+    <div class="adm-head">
+      <div><p class="eyebrow">Demo admin panel · no login</p><h2 id="admT">Store admin</h2></div>
+      <div class="adm-actions">
+        <a class="btn ghost" href="#top">View storefront</a>
+        <button class="btn ghost" id="resetDemo" type="button">Reset demo data</button>
+      </div>
+    </div>
+    <p class="adm-note">Anyone can open this panel. Changes are saved in this browser only, and all orders and revenue are fictional.</p>
+    <div class="stats" id="stats"><div class="stat"><span class="l">Products</span><b>12</b><small>in the catalog</small></div><div class="stat"><span class="l">Demo revenue</span><b>$1,551.00</b><small>excludes cancelled orders</small></div><div class="stat"><span class="l">Orders</span><b>10</b><small>3 still open</small></div></div>
+    <div class="tabs adm-tabs" role="group" aria-label="Admin sections">
+      <button class="atab" type="button" data-tab="products" aria-pressed="false">Products</button>
+      <button class="atab" type="button" data-tab="orders" aria-pressed="true">Orders</button>
+    </div>
+    <div id="panelProducts" hidden="">
+      <div class="row tbar"><p id="pCount" class="eyebrow">12 products</p><button class="btn accent" id="addP" type="button">Add product</button></div>
+      <form class="pform" id="pForm" novalidate="">
+        <h3 id="pFormT">Add product</h3>
+        <div class="two">
+          <label for="pName">Name<input id="pName" maxlength="60" autocomplete="off"></label>
+          <label for="pKind">Type label<input id="pKind" maxlength="20" placeholder="e.g. Overshirt" autocomplete="off"></label>
+        </div>
+        <div class="two">
+          <label for="pCat">Category<select class="field" id="pCat"><option value="men">Men</option><option value="women">Women</option><option value="accessories">Accessories</option></select></label>
+          <label for="pTag">Tag<select class="field" id="pTag"><option value="">None</option><option value="New">New</option><option value="Sale">Sale</option></select></label>
+        </div>
+        <div class="two">
+          <label for="pPrice">Price (USD)<input id="pPrice" type="number" min="1" step="0.01" inputmode="decimal"></label>
+          <label for="pWas">Original price (optional)<input id="pWas" type="number" min="1" step="0.01" inputmode="decimal"></label>
+        </div>
+        <div class="two">
+          <label for="pPalette">Color<select class="field" id="pPalette"><option value="0">Fjord blue</option><option value="1">Rust</option><option value="2">Forest</option><option value="3">Plum</option><option value="4">Sand</option><option value="5">Denim</option><option value="6">Rose</option><option value="7">Teal</option><option value="8">Leather</option><option value="9">Slate</option><option value="10">Camel</option><option value="11">Ochre</option></select></label>
+          <label for="pShape">Visual style<select class="field" id="pShape"><option value="circle">Circle</option><option value="arch">Arch</option><option value="bands">Bands</option><option value="slope">Slope</option><option value="dot">Dot</option></select></label>
+        </div>
+        <label for="pBlurb">Description<textarea id="pBlurb" maxlength="120" style="min-height:80px"></textarea></label>
+        <div id="pErr" role="alert" class=""></div>
+        <div class="acts-row">
+          <button class="btn accent" type="submit" id="pSave">Add product</button>
+          <button class="btn ghost" type="button" id="pCancel">Cancel</button>
+        </div>
+      </form>
+      <div class="tbl-wrap" id="pTable"><table><thead><tr><th scope="col"><span class="vh">Image</span></th><th scope="col">Product</th><th scope="col">Category</th><th scope="col" class="num">Price</th><th scope="col">Tag</th><th scope="col"><span class="vh">Actions</span></th></tr></thead><tbody><tr><td><span class="mini" style="--c1:#3C5A6B;--c2:#1E3340"></span></td><td><strong>Fjell Wool Overshirt</strong><div class="sub">Overshirt</div></td><td>Men</td><td class="num">$148.00</td><td>New</td><td class="acts"><button class="sbtn" type="button" data-edit="fjell-overshirt" aria-label="Edit Fjell Wool Overshirt">Edit</button> <button class="sbtn danger" type="button" data-del="fjell-overshirt" aria-label="Delete Fjell Wool Overshirt">Delete</button></td></tr><tr><td><span class="mini" style="--c1:#5E6F5A;--c2:#2E3B2D"></span></td><td><strong>Harbor Merino Crew</strong><div class="sub">Knit</div></td><td>Men</td><td class="num">$96.00</td><td>None</td><td class="acts"><button class="sbtn" type="button" data-edit="harbor-crew" aria-label="Edit Harbor Merino Crew">Edit</button> <button class="sbtn danger" type="button" data-del="harbor-crew" aria-label="Delete Harbor Merino Crew">Delete</button></td></tr><tr><td><span class="mini" style="--c1:#8A7B62;--c2:#4A4030"></span></td><td><strong>Tapered Field Trouser</strong><div class="sub">Trouser</div></td><td>Men</td><td class="num">$112.00</td><td>None</td><td class="acts"><button class="sbtn" type="button" data-edit="field-trouser" aria-label="Edit Tapered Field Trouser">Edit</button> <button class="sbtn danger" type="button" data-del="field-trouser" aria-label="Delete Tapered Field Trouser">Delete</button></td></tr><tr><td><span class="mini" style="--c1:#C2623F;--c2:#6B2D1B"></span></td><td><strong>Lane Water-Resist Parka</strong><div class="sub">Outerwear</div></td><td>Men</td><td class="num"><s>$290.00</s>$240.00</td><td>Sale</td><td class="acts"><button class="sbtn" type="button" data-edit="lane-parka" aria-label="Edit Lane Water-Resist Parka">Edit</button> <button class="sbtn danger" type="button" data-del="lane-parka" aria-label="Delete Lane Water-Resist Parka">Delete</button></td></tr><tr><td><span class="mini" style="--c1:#A4795F;--c2:#573A2C"></span></td><td><strong>Skog Wrap Coat</strong><div class="sub">Outerwear</div></td><td>Women</td><td class="num">$265.00</td><td>New</td><td class="acts"><button class="sbtn" type="button" data-edit="skog-coat" aria-label="Edit Skog Wrap Coat">Edit</button> <button class="sbtn danger" type="button" data-del="skog-coat" aria-label="Delete Skog Wrap Coat">Delete</button></td></tr><tr><td><span class="mini" style="--c1:#6C5B7B;--c2:#33293D"></span></td><td><strong>Linnea Knit Dress</strong><div class="sub">Dress</div></td><td>Women</td><td class="num">$138.00</td><td>None</td><td class="acts"><button class="sbtn" type="button" data-edit="linnea-dress" aria-label="Edit Linnea Knit Dress">Edit</button> <button class="sbtn danger" type="button" data-del="linnea-dress" aria-label="Delete Linnea Knit Dress">Delete</button></td></tr><tr><td><span class="mini" style="--c1:#3F5F8A;--c2:#1C2F4B"></span></td><td><strong>Strand High-Rise Denim</strong><div class="sub">Denim</div></td><td>Women</td><td class="num">$108.00</td><td>None</td><td class="acts"><button class="sbtn" type="button" data-edit="strand-denim" aria-label="Edit Strand High-Rise Denim">Edit</button> <button class="sbtn danger" type="button" data-del="strand-denim" aria-label="Delete Strand High-Rise Denim">Delete</button></td></tr><tr><td><span class="mini" style="--c1:#8C3F4B;--c2:#47202A"></span></td><td><strong>Dusk Ribbed Turtleneck</strong><div class="sub">Knit</div></td><td>Women</td><td class="num">$74.00</td><td>None</td><td class="acts"><button class="sbtn" type="button" data-edit="dusk-turtleneck" aria-label="Edit Dusk Ribbed Turtleneck">Edit</button> <button class="sbtn danger" type="button" data-del="dusk-turtleneck" aria-label="Delete Dusk Ribbed Turtleneck">Delete</button></td></tr><tr><td><span class="mini" style="--c1:#B9A25E;--c2:#6A5A27"></span></td><td><strong>Nord Wool Scarf</strong><div class="sub">Scarf</div></td><td>Accessories</td><td class="num">$58.00</td><td>None</td><td class="acts"><button class="sbtn" type="button" data-edit="nord-scarf" aria-label="Edit Nord Wool Scarf">Edit</button> <button class="sbtn danger" type="button" data-del="nord-scarf" aria-label="Delete Nord Wool Scarf">Delete</button></td></tr><tr><td><span class="mini" style="--c1:#4C6B66;--c2:#22352F"></span></td><td><strong>Quay Canvas Tote</strong><div class="sub">Bag</div></td><td>Accessories</td><td class="num">$64.00</td><td>None</td><td class="acts"><button class="sbtn" type="button" data-edit="quay-tote" aria-label="Edit Quay Canvas Tote">Edit</button> <button class="sbtn danger" type="button" data-del="quay-tote" aria-label="Delete Quay Canvas Tote">Delete</button></td></tr><tr><td><span class="mini" style="--c1:#7A5236;--c2:#3B2616"></span></td><td><strong>Ridge Leather Belt</strong><div class="sub">Belt</div></td><td>Accessories</td><td class="num">$52.00</td><td>None</td><td class="acts"><button class="sbtn" type="button" data-edit="ridge-belt" aria-label="Edit Ridge Leather Belt">Edit</button> <button class="sbtn danger" type="button" data-del="ridge-belt" aria-label="Delete Ridge Leather Belt">Delete</button></td></tr><tr><td><span class="mini" style="--c1:#5B6670;--c2:#2A3138"></span></td><td><strong>Kvell Watch Cap</strong><div class="sub">Hat</div></td><td>Accessories</td><td class="num">$34.00</td><td>None</td><td class="acts"><button class="sbtn" type="button" data-edit="kvell-cap" aria-label="Edit Kvell Watch Cap">Edit</button> <button class="sbtn danger" type="button" data-del="kvell-cap" aria-label="Delete Kvell Watch Cap">Delete</button></td></tr></tbody></table></div>
+    </div>
+    <div id="panelOrders">
+      <div class="tbl-wrap" id="oTable"><table><thead><tr><th scope="col">Order</th><th scope="col">Date</th><th scope="col">Customer</th><th scope="col">Items</th><th scope="col" class="num">Total</th><th scope="col">Status</th></tr></thead><tbody><tr><td class="mono">NL-104218</td><td class="mono">Nov 22</td><td>Maren Aldous</td><td class="items">Fjell Wool Overshirt (M) ×1, Nord Wool Scarf (One size) ×1</td><td class="num">$206.00</td><td><select class="st" data-oid="NL-104218" data-st="Processing" aria-label="Status for order NL-104218"><option selected="">Processing</option><option>Shipped</option><option>Delivered</option><option>Cancelled</option></select></td></tr><tr><td class="mono">NL-104205</td><td class="mono">Nov 21</td><td>Tobias Reyne</td><td class="items">Lane Water-Resist Parka (L) ×1</td><td class="num">$240.00</td><td><select class="st" data-oid="NL-104205" data-st="Shipped" aria-label="Status for order NL-104205"><option>Processing</option><option selected="">Shipped</option><option>Delivered</option><option>Cancelled</option></select></td></tr><tr><td class="mono">NL-104197</td><td class="mono">Nov 20</td><td>Ilse Varga</td><td class="items">Skog Wrap Coat (S) ×1, Kvell Watch Cap (One size) ×1</td><td class="num">$299.00</td><td><select class="st" data-oid="NL-104197" data-st="Shipped" aria-label="Status for order NL-104197"><option>Processing</option><option selected="">Shipped</option><option>Delivered</option><option>Cancelled</option></select></td></tr><tr><td class="mono">NL-104183</td><td class="mono">Nov 19</td><td>Jonas Pell</td><td class="items">Harbor Merino Crew (M) ×2</td><td class="num">$192.00</td><td><select class="st" data-oid="NL-104183" data-st="Delivered" aria-label="Status for order NL-104183"><option>Processing</option><option>Shipped</option><option selected="">Delivered</option><option>Cancelled</option></select></td></tr><tr><td class="mono">NL-104171</td><td class="mono">Nov 18</td><td>Aiko Brandt</td><td class="items">Strand High-Rise Denim (S) ×1</td><td class="num">$117.00</td><td><select class="st" data-oid="NL-104171" data-st="Delivered" aria-label="Status for order NL-104171"><option>Processing</option><option>Shipped</option><option selected="">Delivered</option><option>Cancelled</option></select></td></tr><tr><td class="mono">NL-104160</td><td class="mono">Nov 17</td><td>Calder Moon</td><td class="items">Quay Canvas Tote (One size) ×1, Ridge Leather Belt (34) ×1</td><td class="num">$125.00</td><td><select class="st" data-oid="NL-104160" data-st="Delivered" aria-label="Status for order NL-104160"><option>Processing</option><option>Shipped</option><option selected="">Delivered</option><option>Cancelled</option></select></td></tr><tr><td class="mono">NL-104152</td><td class="mono">Nov 15</td><td>Sunniva Holt</td><td class="items">Linnea Knit Dress (M) ×1, Dusk Ribbed Turtleneck (M) ×1</td><td class="num">$212.00</td><td><select class="st" data-oid="NL-104152" data-st="Delivered" aria-label="Status for order NL-104152"><option>Processing</option><option>Shipped</option><option selected="">Delivered</option><option>Cancelled</option></select></td></tr><tr><td class="mono">NL-104139</td><td class="mono">Nov 14</td><td>Remy Okafor</td><td class="items">Tapered Field Trouser (L) ×1</td><td class="num">$121.00</td><td><select class="st" data-oid="NL-104139" data-st="Cancelled" aria-label="Status for order NL-104139"><option>Processing</option><option>Shipped</option><option>Delivered</option><option selected="">Cancelled</option></select></td></tr><tr><td class="mono">NL-104128</td><td class="mono">Nov 12</td><td>Petra Lind</td><td class="items">Dusk Ribbed Turtleneck (S) ×1</td><td class="num">$83.00</td><td><select class="st" data-oid="NL-104128" data-st="Delivered" aria-label="Status for order NL-104128"><option>Processing</option><option>Shipped</option><option selected="">Delivered</option><option>Cancelled</option></select></td></tr><tr><td class="mono">NL-104117</td><td class="mono">Nov 10</td><td>Emil Haugen</td><td class="items">Kvell Watch Cap (One size) ×2</td><td class="num">$77.00</td><td><select class="st" data-oid="NL-104117" data-st="Delivered" aria-label="Status for order NL-104117"><option>Processing</option><option>Shipped</option><option selected="">Delivered</option><option>Cancelled</option></select></td></tr></tbody></table></div>
+    </div>
+  </div>
+</section>
+
+<footer hidden="">
+  <div class="wrap"><span>© 2026 Nord Lane. Fictional brand, mock content.</span><span>Prices in USD</span></div>
+</footer>
+
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-label="Shopping cart" inert="">
+  <div class="d-head"><h2>Your cart</h2><button class="x" id="closeCart" aria-label="Close cart">×</button></div>
+  <div class="d-body" id="dBody"><div class="d-empty"><p>Your cart is empty.</p><p style="margin-top:.4rem;font-size:.9rem">Add a piece from the collection to get started.</p></div></div>
+  <div class="d-foot" id="dFoot"><button class="btn accent" id="keep">Keep shopping</button></div>
+</aside>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(function(){
+  var DEFAULTS=[
+    {id:"fjell-overshirt",name:"Fjell Wool Overshirt",cat:"men",price:148,kind:"Overshirt",blurb:"Brushed wool blend, snap front, two chest pockets.",c:["#3C5A6B","#1E3340","#8FB3C4"],shape:"slope",flag:"New"},
+    {id:"harbor-crew",name:"Harbor Merino Crew",cat:"men",price:96,kind:"Knit",blurb:"Fine-gauge merino, ribbed hem, true to size.",c:["#5E6F5A","#2E3B2D","#C9D6A8"],shape:"circle"},
+    {id:"field-trouser",name:"Tapered Field Trouser",cat:"men",price:112,kind:"Trouser",blurb:"Cotton twill with a stretch waist and deep pockets.",c:["#8A7B62","#4A4030","#D9C9A3"],shape:"bands"},
+    {id:"lane-parka",name:"Lane Water-Resist Parka",cat:"men",price:240,was:290,kind:"Outerwear",blurb:"Recycled shell, taped seams, packable hood.",c:["#C2623F","#6B2D1B","#F2B58E"],shape:"arch",flag:"Sale"},
+    {id:"skog-coat",name:"Skog Wrap Coat",cat:"women",price:265,kind:"Outerwear",blurb:"Double-faced wool, belted wrap, knee length.",c:["#A4795F","#573A2C","#EBC8A9"],shape:"arch",flag:"New"},
+    {id:"linnea-dress",name:"Linnea Knit Dress",cat:"women",price:138,kind:"Dress",blurb:"Midi rib knit with a soft funnel neck.",c:["#6C5B7B","#33293D","#CDB8E0"],shape:"circle"},
+    {id:"strand-denim",name:"Strand High-Rise Denim",cat:"women",price:108,kind:"Denim",blurb:"Rigid organic denim that softens with wear.",c:["#3F5F8A","#1C2F4B","#9DB8DE"],shape:"bands"},
+    {id:"dusk-turtleneck",name:"Dusk Ribbed Turtleneck",cat:"women",price:74,kind:"Knit",blurb:"Close-fitting cotton rib, layers under anything.",c:["#8C3F4B","#47202A","#E7A2AC"],shape:"dot"},
+    {id:"nord-scarf",name:"Nord Wool Scarf",cat:"accessories",price:58,kind:"Scarf",blurb:"Lambswool, 200 cm, fringed ends.",c:["#B9A25E","#6A5A27","#F0E1A0"],shape:"bands"},
+    {id:"quay-tote",name:"Quay Canvas Tote",cat:"accessories",price:64,kind:"Bag",blurb:"Waxed canvas, leather handles, inner zip pocket.",c:["#4C6B66","#22352F","#A9D1C7"],shape:"slope"},
+    {id:"ridge-belt",name:"Ridge Leather Belt",cat:"accessories",price:52,kind:"Belt",blurb:"Vegetable-tanned leather, brushed steel buckle.",c:["#7A5236","#3B2616","#D8A878"],shape:"dot"},
+    {id:"kvell-cap",name:"Kvell Watch Cap",cat:"accessories",price:34,kind:"Hat",blurb:"Double-knit merino, folds to the length you like.",c:["#5B6670","#2A3138","#B6C3CE"],shape:"circle"}
+  ];
+  var SIZES=["XS","S","M","L","XL"];
+  var FREE_SHIP=150, SHIP=9;
+  var byId={};
+  var CATS={men:"Men",women:"Women",accessories:"Accessories"};
+  var SHAPES={circle:"Circle",arch:"Arch",bands:"Bands",slope:"Slope",dot:"Dot"};
+  var PALETTES=[
+    {name:"Fjord blue",c:["#3C5A6B","#1E3340","#8FB3C4"]},{name:"Rust",c:["#C2623F","#6B2D1B","#F2B58E"]},
+    {name:"Forest",c:["#5E6F5A","#2E3B2D","#C9D6A8"]},{name:"Plum",c:["#6C5B7B","#33293D","#CDB8E0"]},
+    {name:"Sand",c:["#8A7B62","#4A4030","#D9C9A3"]},{name:"Denim",c:["#3F5F8A","#1C2F4B","#9DB8DE"]},
+    {name:"Rose",c:["#8C3F4B","#47202A","#E7A2AC"]},{name:"Teal",c:["#4C6B66","#22352F","#A9D1C7"]},
+    {name:"Leather",c:["#7A5236","#3B2616","#D8A878"]},{name:"Slate",c:["#5B6670","#2A3138","#B6C3CE"]},
+    {name:"Camel",c:["#A4795F","#573A2C","#EBC8A9"]},{name:"Ochre",c:["#B9A25E","#6A5A27","#F0E1A0"]}
+  ];
+  var STATUSES=["Processing","Shipped","Delivered","Cancelled"];
+  var HEX=/^#[0-9a-f]{6}$/i;
+  function own(o,k){return Object.prototype.hasOwnProperty.call(o,k)}
+  function lsGet(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}}
+  function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+  function validProduct(p){
+    return !!p&&typeof p.id==="string"&&/^[a-z0-9-]{1,40}$/i.test(p.id)&&typeof p.name==="string"&&p.name.length>0&&
+      typeof p.cat==="string"&&own(CATS,p.cat)&&typeof p.price==="number"&&p.price>0&&typeof p.kind==="string"&&typeof p.blurb==="string"&&
+      Array.isArray(p.c)&&p.c.length===3&&p.c.every(function(x){return typeof x==="string"&&HEX.test(x)})&&
+      typeof p.shape==="string"&&own(SHAPES,p.shape)&&(p.flag===undefined||p.flag==="New"||p.flag==="Sale")&&(p.was===undefined||typeof p.was==="number");
+  }
+  function loadCatalog(){
+    var s=lsGet("nordlane-catalog");
+    if(Array.isArray(s)) return s.filter(validProduct);
+    return JSON.parse(JSON.stringify(DEFAULTS));
+  }
+  var PRODUCTS=loadCatalog();
+  function reindex(){for(var k in byId) delete byId[k]; PRODUCTS.forEach(function(p){byId[p.id]=p})}
+  reindex();
+
+  function seedOrders(){
+    var raw=[
+      ["NL-104218","Maren Aldous","2026-11-22",[["Fjell Wool Overshirt (M)",1,148],["Nord Wool Scarf (One size)",1,58]],"Processing"],
+      ["NL-104205","Tobias Reyne","2026-11-21",[["Lane Water-Resist Parka (L)",1,240]],"Shipped"],
+      ["NL-104197","Ilse Varga","2026-11-20",[["Skog Wrap Coat (S)",1,265],["Kvell Watch Cap (One size)",1,34]],"Shipped"],
+      ["NL-104183","Jonas Pell","2026-11-19",[["Harbor Merino Crew (M)",2,96]],"Delivered"],
+      ["NL-104171","Aiko Brandt","2026-11-18",[["Strand High-Rise Denim (S)",1,108]],"Delivered"],
+      ["NL-104160","Calder Moon","2026-11-17",[["Quay Canvas Tote (One size)",1,64],["Ridge Leather Belt (34)",1,52]],"Delivered"],
+      ["NL-104152","Sunniva Holt","2026-11-15",[["Linnea Knit Dress (M)",1,138],["Dusk Ribbed Turtleneck (M)",1,74]],"Delivered"],
+      ["NL-104139","Remy Okafor","2026-11-14",[["Tapered Field Trouser (L)",1,112]],"Cancelled"],
+      ["NL-104128","Petra Lind","2026-11-12",[["Dusk Ribbed Turtleneck (S)",1,74]],"Delivered"],
+      ["NL-104117","Emil Haugen","2026-11-10",[["Kvell Watch Cap (One size)",2,34]],"Delivered"]
+    ];
+    return raw.map(function(r){
+      var sub=r[3].reduce(function(s,i){return s+i[1]*i[2]},0);
+      return {id:r[0],customer:r[1],date:r[2],items:r[3],ship:sub>=FREE_SHIP?0:SHIP,status:r[4]};
+    });
+  }
+  function validOrder(o){
+    return !!o&&typeof o.id==="string"&&typeof o.customer==="string"&&typeof o.date==="string"&&/^\d{4}-\d{2}-\d{2}$/.test(o.date)&&
+      typeof o.ship==="number"&&STATUSES.indexOf(o.status)>=0&&Array.isArray(o.items)&&
+      o.items.every(function(i){return Array.isArray(i)&&typeof i[0]==="string"&&typeof i[1]==="number"&&typeof i[2]==="number"});
+  }
+  function loadOrders(){var s=lsGet("nordlane-orders"); return Array.isArray(s)?s.filter(validOrder):seedOrders()}
+  var orders=loadOrders();
+  function orderTotal(o){return o.items.reduce(function(s,i){return s+i[1]*i[2]},0)+o.ship}
+  var state={cat:"all",sort:"featured"};
+  var cart=[];
+
+  var $=function(id){return document.getElementById(id)};
+  var fmt=function(n){return n.toLocaleString("en-US",{style:"currency",currency:"USD"})};
+  var esc=function(s){return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})};
+
+  try{var saved=JSON.parse(localStorage.getItem("nordlane-cart")||"[]");
+    if(Array.isArray(saved)) cart=saved.filter(function(l){return byId[l.id]&&l.qty>0&&l.qty<100});}catch(e){}
+  function persist(){try{localStorage.setItem("nordlane-cart",JSON.stringify(cart))}catch(e){}}
+
+  /* product grid */
+  function sizeOptions(p){
+    if(p.cat==="accessories"&&p.kind!=="Belt") return '<option value="One size">One size</option>';
+    if(p.cat==="accessories") return ["30","32","34","36","38"].map(function(s,i){return '<option'+(i===2?' selected':'')+'>'+s+'</option>'}).join("");
+    return SIZES.map(function(s){return '<option'+(s==="M"?' selected':'')+'>'+s+'</option>'}).join("");
+  }
+  function renderGrid(){
+    var list=PRODUCTS.filter(function(p){return state.cat==="all"||p.cat===state.cat});
+    if(state.sort==="low") list.sort(function(a,b){return a.price-b.price});
+    if(state.sort==="high") list.sort(function(a,b){return b.price-a.price});
+    if(state.sort==="name") list.sort(function(a,b){return a.name.localeCompare(b.name)});
+    $("grid").innerHTML=list.length?list.map(function(p){
+      return '<article class="card">'+
+        '<div class="art s-'+p.shape+'" style="--c1:'+p.c[0]+';--c2:'+p.c[1]+';--c3:'+p.c[2]+'" role="img" aria-label="'+esc(p.name)+' placeholder image">'+
+          (p.flag?'<span class="flag">'+p.flag+'</span>':'')+'<span class="kind">'+esc(p.kind)+'</span></div>'+
+        '<div><div class="row"><h3>'+esc(p.name)+'</h3></div><p class="blurb">'+esc(p.blurb)+'</p></div>'+
+        '<div class="row"><span class="price">'+(p.was?'<s>'+fmt(p.was)+'</s>':'')+fmt(p.price)+'</span></div>'+
+        '<div class="buy"><select id="size-'+p.id+'" aria-label="Size for '+esc(p.name)+'">'+sizeOptions(p)+'</select>'+
+        '<button class="btn accent" data-add="'+p.id+'">Add to cart</button></div></article>';
+    }).join(""):'<div class="empty">No products match this filter.</div>';
+  }
+  function setCat(cat){
+    state.cat=cat;
+    document.querySelectorAll(".tab").forEach(function(t){t.setAttribute("aria-pressed",String(t.dataset.cat===cat))});
+    renderGrid();
+  }
+  function updateCounts(){
+    ["men","women","accessories"].forEach(function(c){
+      var n=PRODUCTS.filter(function(p){return p.cat===c}).length;
+      $("n-"+c).textContent=n+(n===1?" piece":" pieces");
+    });
+  }
+  updateCounts();
+  document.querySelectorAll(".tab").forEach(function(t){t.addEventListener("click",function(){setCat(t.dataset.cat)})});
+  document.querySelectorAll("[data-cat]").forEach(function(el){
+    if(el.classList.contains("tab")) return;
+    el.addEventListener("click",function(e){
+      setCat(el.dataset.cat);
+      if(el.tagName==="BUTTON"){e.preventDefault();$("shop").scrollIntoView({behavior:"smooth"})}
+    });
+  });
+  $("sort").addEventListener("change",function(e){state.sort=e.target.value;renderGrid()});
+  $("grid").addEventListener("click",function(e){
+    var b=e.target.closest("[data-add]"); if(!b) return;
+    var id=b.dataset.add, size=$("size-"+id).value;
+    addToCart(id,size);
+  });
+
+  /* cart */
+  function addToCart(id,size){
+    var l=cart.find(function(x){return x.id===id&&x.size===size});
+    if(l){ if(l.qty<20) l.qty++; } else cart.push({id:id,size:size,qty:1});
+    persist(); renderCart(); toast(byId[id].name+" ("+size+") added to cart");
+  }
+  function totals(){
+    var sub=cart.reduce(function(s,l){return s+byId[l.id].price*l.qty},0);
+    var ship=sub===0?0:(sub>=FREE_SHIP?0:SHIP);
+    return {sub:sub,ship:ship,total:sub+ship,items:cart.reduce(function(n,l){return n+l.qty},0)};
+  }
+  function renderCart(){
+    var t=totals();
+    $("count").textContent=t.items;
+    $("openCart").setAttribute("aria-label","Open cart, "+t.items+" items");
+    if(!cart.length){
+      $("dBody").innerHTML='<div class="d-empty"><p>Your cart is empty.</p><p style="margin-top:.4rem;font-size:.9rem">Add a piece from the collection to get started.</p></div>';
+      $("dFoot").innerHTML='<button class="btn accent" id="keep">Keep shopping</button>';
+      $("keep").addEventListener("click",function(){closeCart();$("shop").scrollIntoView({behavior:"smooth"})});
+      return;
+    }
+    $("dBody").innerHTML=cart.map(function(l,i){
+      var p=byId[l.id];
+      return '<div class="line"><div class="thumb" style="--c1:'+p.c[0]+';--c2:'+p.c[1]+'"></div>'+
+        '<div><h3>'+esc(p.name)+'</h3><div class="sub">'+esc(l.size)+' · '+fmt(p.price)+' each</div>'+
+        '<div class="qty"><button data-dec="'+i+'" aria-label="Decrease quantity of '+esc(p.name)+'">&minus;</button><output aria-live="polite">'+l.qty+'</output><button data-inc="'+i+'" aria-label="Increase quantity of '+esc(p.name)+'">+</button></div></div>'+
+        '<div class="amt">'+fmt(p.price*l.qty)+'<button class="rm" data-rm="'+i+'" aria-label="Remove '+esc(p.name)+'">Remove</button></div></div>';
+    }).join("");
+    var left=Math.max(0,FREE_SHIP-t.sub), pct=Math.min(100,t.sub/FREE_SHIP*100);
+    $("dFoot").innerHTML=
+      '<div class="bar-ship" aria-hidden="true"><i style="width:'+pct+'%"></i></div>'+
+      '<p class="ship-note">'+(left>0?'Add '+fmt(left)+' more for free shipping.':'You have free shipping.')+'</p>'+
+      '<div class="sum"><span>Subtotal</span><span>'+fmt(t.sub)+'</span></div>'+
+      '<div class="sum"><span>Shipping</span><span>'+(t.ship?fmt(t.ship):'Free')+'</span></div>'+
+      '<div class="sum total"><span>Total</span><span>'+fmt(t.total)+'</span></div>'+
+      '<button class="btn accent" id="checkout">Checkout (demo)</button>'+
+      '<button class="rm" id="clear" style="margin:.2rem auto 0">Clear cart</button>';
+    $("checkout").addEventListener("click",checkout);
+    $("clear").addEventListener("click",function(){cart=[];persist();renderCart()});
+  }
+  $("dBody").addEventListener("click",function(e){
+    var b=e.target.closest("button"); if(!b) return;
+    if(b.dataset.inc!==undefined){var l=cart[+b.dataset.inc]; if(l.qty<20) l.qty++;}
+    else if(b.dataset.dec!==undefined){var m=cart[+b.dataset.dec]; m.qty--; if(m.qty<=0) cart.splice(+b.dataset.dec,1);}
+    else if(b.dataset.rm!==undefined){cart.splice(+b.dataset.rm,1);}
+    else return;
+    persist(); renderCart();
+  });
+  function checkout(){
+    var t=totals(), ref="NL-"+Math.floor(100000+Math.random()*900000);
+    recordOrder(ref,t);
+    cart=[]; persist(); $("count").textContent="0";
+    $("dBody").innerHTML='<div class="done"><h3>Order placed</h3><p>Reference <strong style="font-family:var(--font-mono)">'+ref+'</strong></p><p style="color:var(--muted);font-size:.92rem">This is a demo store. No payment was taken and nothing will ship. Total shown: '+fmt(t.total)+'.</p></div>';
+    $("dFoot").innerHTML='<button class="btn accent" id="back">Back to shop</button>';
+    $("back").addEventListener("click",function(){closeCart();renderCart()});
+  }
+  var lastFocus=null;
+  function openCart(){
+    lastFocus=document.activeElement;
+    $("drawer").removeAttribute("inert"); $("drawer").classList.add("on"); $("scrim").classList.add("on");
+    document.body.style.overflow="hidden"; $("closeCart").focus();
+  }
+  function closeCart(){
+    $("drawer").classList.remove("on"); $("scrim").classList.remove("on"); $("drawer").setAttribute("inert","");
+    document.body.style.overflow=""; if(lastFocus&&lastFocus.focus) lastFocus.focus();
+  }
+  $("openCart").addEventListener("click",openCart);
+  $("closeCart").addEventListener("click",closeCart);
+  $("scrim").addEventListener("click",closeCart);
+  document.addEventListener("keydown",function(e){if(e.key==="Escape"&&$("drawer").classList.contains("on")) closeCart()});
+
+  var tt;
+  function toast(msg){var el=$("toast");el.textContent=msg;el.classList.add("on");clearTimeout(tt);tt=setTimeout(function(){el.classList.remove("on")},2200)}
+
+  /* contact form (demo only) */
+  $("contactForm").addEventListener("submit",function(e){
+    e.preventDefault();
+    var n=$("cName").value.trim(), em=$("cEmail").value.trim(), m=$("cMsg").value.trim(), out=$("formMsg");
+    if(!n||!em||!m){out.className="notice";out.textContent="Please fill in your name, email and message.";return}
+    if(!/^\S+@\S+\.\S+$/.test(em)){out.className="notice";out.textContent="That email address looks incomplete. Check it and try again.";return}
+    out.className="notice";out.textContent="Thanks, "+n+". This is a demo form, so your message was not sent anywhere.";
+    e.target.reset();
+  });
+
+  /* ---------- demo admin ---------- */
+  var AD={tab:"products",editing:null,pendingDelete:null,pendingReset:false};
+  var pdTimer,rsTimer;
+  function todayStr(){var d=new Date();return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2)}
+  function fmtDate(s){return new Date(s+"T00:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric"})}
+  function saveCatalog(){lsSet("nordlane-catalog",PRODUCTS)}
+  function saveOrders(){lsSet("nordlane-orders",orders)}
+  function afterCatalogChange(){
+    saveCatalog(); reindex();
+    cart=cart.filter(function(l){return byId[l.id]}); persist();
+    renderGrid(); updateCounts(); renderCart(); renderAdmin();
+  }
+  function recordOrder(ref,t){
+    orders.unshift({id:ref,customer:"Demo shopper",date:todayStr(),status:"Processing",ship:t.ship,
+      items:cart.map(function(l){var p=byId[l.id];return [p.name+" ("+l.size+")",l.qty,p.price]})});
+    if(orders.length>100) orders.length=100;
+    saveOrders(); renderAdmin();
+  }
+
+  $("pCat").innerHTML=Object.keys(CATS).map(function(k){return '<option value="'+k+'">'+CATS[k]+'</option>'}).join("");
+  $("pShape").innerHTML=Object.keys(SHAPES).map(function(k){return '<option value="'+k+'">'+SHAPES[k]+'</option>'}).join("");
+  $("pPalette").innerHTML=PALETTES.map(function(p,i){return '<option value="'+i+'">'+p.name+'</option>'}).join("");
+
+  function renderStats(){
+    var live=orders.filter(function(o){return o.status!=="Cancelled"});
+    var rev=live.reduce(function(s,o){return s+orderTotal(o)},0);
+    var open=orders.filter(function(o){return o.status==="Processing"||o.status==="Shipped"}).length;
+    $("stats").innerHTML=
+      '<div class="stat"><span class="l">Products</span><b>'+PRODUCTS.length+'</b><small>in the catalog</small></div>'+
+      '<div class="stat"><span class="l">Demo revenue</span><b>'+fmt(rev)+'</b><small>excludes cancelled orders</small></div>'+
+      '<div class="stat"><span class="l">Orders</span><b>'+orders.length+'</b><small>'+open+' still open</small></div>';
+  }
+  function renderProducts(){
+    $("pCount").textContent=PRODUCTS.length+(PRODUCTS.length===1?" product":" products");
+    if(!PRODUCTS.length){
+      $("pTable").innerHTML='<div class="empty" style="border:0">The catalog is empty. Add a product or reset the demo data.</div>'; return;
+    }
+    $("pTable").innerHTML='<table><thead><tr><th scope="col"><span class="vh">Image</span></th><th scope="col">Product</th><th scope="col">Category</th><th scope="col" class="num">Price</th><th scope="col">Tag</th><th scope="col"><span class="vh">Actions</span></th></tr></thead><tbody>'+
+      PRODUCTS.map(function(p){
+        var confirming=AD.pendingDelete===p.id;
+        return '<tr><td><span class="mini" style="--c1:'+p.c[0]+';--c2:'+p.c[1]+'"></span></td>'+
+          '<td><strong>'+esc(p.name)+'</strong><div class="sub">'+esc(p.kind)+'</div></td>'+
+          '<td>'+CATS[p.cat]+'</td>'+
+          '<td class="num">'+(p.was?'<s>'+fmt(p.was)+'</s>':'')+fmt(p.price)+'</td>'+
+          '<td>'+(p.flag||'None')+'</td>'+
+          '<td class="acts"><button class="sbtn" type="button" data-edit="'+esc(p.id)+'" aria-label="Edit '+esc(p.name)+'">Edit</button> '+
+          '<button class="sbtn '+(confirming?'confirm':'danger')+'" type="button" data-del="'+esc(p.id)+'" aria-label="Delete '+esc(p.name)+'">'+(confirming?'Confirm delete':'Delete')+'</button></td></tr>';
+      }).join("")+'</tbody></table>';
+  }
+  function renderOrders(){
+    $("oTable").innerHTML='<table><thead><tr><th scope="col">Order</th><th scope="col">Date</th><th scope="col">Customer</th><th scope="col">Items</th><th scope="col" class="num">Total</th><th scope="col">Status</th></tr></thead><tbody>'+
+      orders.map(function(o){
+        return '<tr><td class="mono">'+esc(o.id)+'</td><td class="mono">'+fmtDate(o.date)+'</td><td>'+esc(o.customer)+'</td>'+
+          '<td class="items">'+o.items.map(function(i){return esc(i[0])+' ×'+i[1]}).join(', ')+'</td>'+
+          '<td class="num">'+fmt(orderTotal(o))+'</td>'+
+          '<td><select class="st" data-oid="'+esc(o.id)+'" data-st="'+o.status+'" aria-label="Status for order '+esc(o.id)+'">'+
+          STATUSES.map(function(s){return '<option'+(s===o.status?' selected':'')+'>'+s+'</option>'}).join('')+'</select></td></tr>';
+      }).join("")+'</tbody></table>';
+  }
+  function syncTabs(){
+    document.querySelectorAll(".atab").forEach(function(b){b.setAttribute("aria-pressed",String(b.dataset.tab===AD.tab))});
+    $("panelProducts").hidden=AD.tab!=="products"; $("panelOrders").hidden=AD.tab!=="orders";
+  }
+  function renderAdmin(){renderStats();renderProducts();renderOrders();syncTabs()}
+
+  document.querySelectorAll(".atab").forEach(function(b){b.addEventListener("click",function(){AD.tab=b.dataset.tab;syncTabs()})});
+
+  function openForm(id){
+    AD.editing=id; AD.pendingDelete=null;
+    var p=id?byId[id]:null;
+    $("pFormT").textContent=p?"Edit product":"Add product";
+    $("pSave").textContent=p?"Save changes":"Add product";
+    $("pName").value=p?p.name:""; $("pKind").value=p?p.kind:""; $("pCat").value=p?p.cat:"men";
+    $("pTag").value=p&&p.flag?p.flag:""; $("pPrice").value=p?p.price:""; $("pWas").value=p&&p.was?p.was:"";
+    var pi=0; if(p) PALETTES.forEach(function(x,i){if(x.c[0]===p.c[0]) pi=i});
+    $("pPalette").value=String(pi); $("pShape").value=p?p.shape:"circle"; $("pBlurb").value=p?p.blurb:"";
+    $("pErr").textContent=""; $("pErr").className="";
+    $("pForm").hidden=false; renderProducts();
+    $("pForm").scrollIntoView({block:"nearest"}); $("pName").focus();
+  }
+  function closeForm(){AD.editing=null;$("pForm").hidden=true}
+  $("addP").addEventListener("click",function(){openForm(null)});
+  $("pCancel").addEventListener("click",closeForm);
+
+  $("pTable").addEventListener("click",function(e){
+    var b=e.target.closest("button"); if(!b) return;
+    if(b.dataset.edit){openForm(b.dataset.edit);return}
+    if(b.dataset.del){
+      var id=b.dataset.del;
+      if(AD.pendingDelete===id){
+        var name=byId[id]?byId[id].name:"Product";
+        var i=PRODUCTS.findIndex(function(p){return p.id===id});
+        if(i>=0) PRODUCTS.splice(i,1);
+        AD.pendingDelete=null; clearTimeout(pdTimer);
+        if(AD.editing===id) closeForm();
+        afterCatalogChange(); toast(name+" deleted");
+      } else {
+        AD.pendingDelete=id; renderProducts();
+        clearTimeout(pdTimer); pdTimer=setTimeout(function(){AD.pendingDelete=null;renderProducts()},4000);
+      }
+    }
+  });
+
+  $("pForm").addEventListener("submit",function(e){
+    e.preventDefault();
+    var name=$("pName").value.trim(), kind=$("pKind").value.trim(), blurb=$("pBlurb").value.trim();
+    var price=parseFloat($("pPrice").value), wasRaw=$("pWas").value.trim(), was=wasRaw===""?null:parseFloat(wasRaw);
+    var err="";
+    if(!name) err="Enter a product name.";
+    else if(!kind) err="Enter a short type label, such as Overshirt or Scarf.";
+    else if(!(price>0&&price<100000)) err="Enter a price greater than 0.";
+    else if(was!==null&&!(was>price)) err="The original price must be higher than the current price, or left empty.";
+    if(err){$("pErr").className="notice";$("pErr").textContent=err;return}
+    var pal=PALETTES[+$("pPalette").value]||PALETTES[0], tag=$("pTag").value;
+    var obj={id:AD.editing||("p-"+Date.now().toString(36)),name:name,cat:$("pCat").value,price:Math.round(price*100)/100,
+      kind:kind,blurb:blurb,c:pal.c.slice(),shape:$("pShape").value};
+    if(tag) obj.flag=tag;
+    if(was!==null) obj.was=Math.round(was*100)/100;
+    var idx=PRODUCTS.findIndex(function(p){return p.id===obj.id});
+    var editing=idx>=0;
+    if(editing) PRODUCTS[idx]=obj; else PRODUCTS.push(obj);
+    closeForm(); afterCatalogChange(); toast(name+(editing?" updated":" added to the catalog"));
+  });
+
+  $("oTable").addEventListener("change",function(e){
+    var s=e.target.closest("select[data-oid]"); if(!s) return;
+    var o=orders.find(function(x){return x.id===s.dataset.oid}); if(!o) return;
+    o.status=s.value; s.setAttribute("data-st",o.status); saveOrders(); renderStats();
+  });
+
+  $("resetDemo").addEventListener("click",function(){
+    var b=this;
+    if(!AD.pendingReset){
+      AD.pendingReset=true; b.textContent="Click again to reset";
+      clearTimeout(rsTimer); rsTimer=setTimeout(function(){AD.pendingReset=false;b.textContent="Reset demo data"},4000); return;
+    }
+    AD.pendingReset=false; clearTimeout(rsTimer); b.textContent="Reset demo data";
+    PRODUCTS.length=0; JSON.parse(JSON.stringify(DEFAULTS)).forEach(function(p){PRODUCTS.push(p)});
+    orders.length=0; seedOrders().forEach(function(o){orders.push(o)}); saveOrders();
+    closeForm(); afterCatalogChange(); toast("Demo data reset");
+  });
+
+  /* view routing: #admin shows the panel, anything else shows the storefront */
+  function route(){
+    var isAdmin=location.hash==="#admin";
+    document.querySelector("main#top").hidden=isAdmin;
+    document.querySelector("footer").hidden=isAdmin;
+    $("adminView").hidden=!isAdmin;
+    if(isAdmin) $("navAdmin").setAttribute("aria-current","page"); else $("navAdmin").removeAttribute("aria-current");
+    if(isAdmin){renderAdmin();window.scrollTo(0,0);return}
+    var id=location.hash.slice(1), el=id?document.getElementById(id):null;
+    if(el) el.scrollIntoView(); else window.scrollTo(0,0);
+  }
+  window.addEventListener("hashchange",route);
+
+  renderGrid(); renderCart(); renderAdmin(); route();
+})();
+</script>
+
+</body></html>
